@@ -16,4 +16,10 @@ def create_app(config_name):
     from app.auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth/')
 
+    from app.paper import paper as paper_blueprint
+    app.register_blueprint(paper_blueprint, url_prefix='/paper')
+
+    from app.topic import topic as topic_blueprint
+    app.register_blueprint(topic_blueprint, url_prefix='/topic')
+
     return app

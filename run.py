@@ -1,6 +1,6 @@
 import os
 from app import create_app, db
-from app.models import Role, User
+from app.models import Role, User, Student, Teacher
 from flask_migrate import Migrate
 
 
@@ -10,7 +10,7 @@ migrate = Migrate(app, db)
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, Role=Role, User=User)
+    return dict(db=db, Role=Role, User=User, Student=Student, Teacher=Teacher)
 
 
 if __name__ == '__main__':
