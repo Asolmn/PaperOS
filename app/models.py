@@ -49,8 +49,8 @@ class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64)) # 教师名
     password = db.Column(db.String(64)) # 密码
-    students = db.relationship('Student', backref='teac', lazy='dynamic') # 指导的学生
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id')) # 属实角色
+    students = db.relationship('Student', backref='teac', lazy='dynamic') # 指导的学生
 
     def to_json(self):
         # 获取当前的学生列表
@@ -63,7 +63,8 @@ class Teacher(db.Model):
                     'id': self.id,
                     'username': self.username,
                     'password': self.password,
-                    'students': studentlist
+                    'students': studentlist,
+                    'role_id': self.role_id
                 }
             ],
             'msg': "",
@@ -89,9 +90,9 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64)) # 学生名
     password = db.Column(db.String(64)) # 密码
-    topics = db.relationship('Topic', backref='stu', lazy='dynamic') # 课题
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id')) # 角色
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id')) # 所属教师
+    topics = db.relationship('Topic', backref='stu', lazy='dynamic')  # 课题
 
     # 序列化
     def to_json(self):
@@ -99,6 +100,7 @@ class Student(db.Model):
         topiclist = []
         for i in self.topics.all():
             topiclist.append(str(i))
+
         # 响应信息
         result = {
             'studentinfo': [
@@ -106,8 +108,10 @@ class Student(db.Model):
                     'id': self.id,
                     'username': self.username,
                     'password': self.password,
-                    'teacher': self.teacher_id,
-                    'topics': topiclist
+                    'teacher': self.teac.username if self.teac is not None else None,
+                    'topics': topiclist,
+                    'role_id': self.role_id,
+                    'role': self.student.name if self.student is not None else None
                 }
             ],
             'msg': "",
@@ -134,9 +138,32 @@ class Topic(db.Model):
     __tablename__ = 'topics'
     id = db.Column(db.Integer, primary_key=True)
     topicname = db.Column(db.String(128), unique=True, nullable=False) # 课题名词
-    uuid = db.Column(db.Integer, unique=True) # 课题唯一UUID
+    uuid = db.Column(db.String(128), unique=True) # 课题唯一UUID
     student_id = db.Column(db.Integer, db.ForeignKey('students.id')) # 课题所属学生
     status = db.Column(db.Boolean, default=False) # 课题通过状态
+
+    def to_json(self):
+        result = {
+            'topicinfo': [
+                {
+                    'topicname': self.topicname,
+                    'uuid': self.uuid,
+                    'status': self.status,
+                    'student': self.stu.username
+                }
+            ],
+            'msg': "",
+            'flag': 0
+        }
+        return result
+
+    def save_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_db(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def __repr__(self):
         return self.uuid

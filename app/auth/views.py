@@ -11,7 +11,8 @@ def hellworld():
 # 登录用户
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    print(data)
     username = data['username']
     password = data['password']
     role = request.json.get('role')

@@ -1,6 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask
 from config import config
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 db = SQLAlchemy()
 
@@ -10,6 +11,8 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+
+    CORS(app, supports_credentials=True)
 
     db.init_app(app)
 
