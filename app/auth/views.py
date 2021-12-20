@@ -214,12 +214,12 @@ def delete_user():
         return jsonify(res)
     if role == 'Student':
         student = Student.query.filter_by(id=id).first()
-        res = change_msg(student.to_json)
+        res = change_msg(student.to_json())
         student.delete_db()
         return jsonify(res)
     if role == 'Teacher':
         teacher = Teacher.query.filter_by(id=id).first()
-        res = change_msg(teacher.to_json)
+        res = change_msg(teacher.to_json())
         teacher.delete_db()
         return jsonify(res)
     return jsonify({'msg': "fail"})

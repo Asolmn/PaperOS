@@ -7,6 +7,80 @@ def change_msg(res):
     return res
 
 
+class Topic(db.Model):
+    """课题"""
+    __tablename__ = 'topics'
+    id = db.Column(db.Integer, primary_key=True)
+    topicname = db.Column(db.String(128), unique=True, nullable=False) # 课题名词
+    uuid = db.Column(db.String(128), unique=True) # 课题唯一UUID
+    status = db.Column(db.Boolean, default=False) # 课题通过状态
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))  # 课题所属学生
+
+    def to_json(self):
+        result = {
+            'topicinfo': [
+                {
+                    'topicname': self.topicname,
+                    'uuid': self.uuid,
+                    'status': self.status,
+                    'student': self.stutopic.username,
+                    'student_id': self.student_id
+                }
+            ],
+            'msg': "",
+            'flag': 0
+        }
+        return result
+
+    def save_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return self.uuid
+
+
+class Paper(db.Model):
+    """论文"""
+    __tablename__ = 'paper'
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(128), unique=True, nullable=False) # 文件名
+    uuid = db.Column(db.String(128), unique=True) # 文件名生成的uuid
+    status = db.Column(db.Boolean, default=False) # 论文状态
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id')) # 论文对应的学生
+
+    def to_json(self):
+        result = {
+            'userinfo':[
+                {
+                    'id': self.id,
+                    'filename': self.filename,
+                    'uuid': self.uuid,
+                    'status': self.status,
+                    'student': self.stupaper.username,
+                    'student_id': self.student_id
+                },
+            ],
+            "msg": "",
+            "flag": 0
+        }
+        return result
+
+    def save_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return self.uuid
+
 class User(db.Model):
     """管理员"""
     __tablename__ = 'users'
@@ -92,7 +166,21 @@ class Student(db.Model):
     password = db.Column(db.String(64)) # 密码
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id')) # 角色
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id')) # 所属教师
-    topics = db.relationship('Topic', backref='stu', lazy='dynamic')  # 课题
+    # topics = db.relationship('Topic', backref='stu', lazy='dynamic')  # 课题
+    topics = db.relationship(
+        'Topic',
+        foreign_keys=[Topic.student_id],
+        backref=db.backref('stutopic', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    papers = db.relationship(
+        'Paper',
+        foreign_keys=[Paper.student_id],
+        backref=db.backref('stupaper',lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     # 序列化
     def to_json(self):
@@ -133,40 +221,6 @@ class Student(db.Model):
         return self.username
 
 
-class Topic(db.Model):
-    """课题"""
-    __tablename__ = 'topics'
-    id = db.Column(db.Integer, primary_key=True)
-    topicname = db.Column(db.String(128), unique=True, nullable=False) # 课题名词
-    uuid = db.Column(db.String(128), unique=True) # 课题唯一UUID
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id')) # 课题所属学生
-    status = db.Column(db.Boolean, default=False) # 课题通过状态
-
-    def to_json(self):
-        result = {
-            'topicinfo': [
-                {
-                    'topicname': self.topicname,
-                    'uuid': self.uuid,
-                    'status': self.status,
-                    'student': self.stu.username
-                }
-            ],
-            'msg': "",
-            'flag': 0
-        }
-        return result
-
-    def save_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def delete_db(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def __repr__(self):
-        return self.uuid
 
 
 class Role(db.Model):
