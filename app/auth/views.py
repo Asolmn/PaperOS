@@ -15,7 +15,7 @@ def login():
     print(data)
     username = data['username']
     password = data['password']
-    role = request.json.get('role')
+    role = data['role']
     # 判断不同角色，获取查询不同的表
     if role == 'Admin':
         user = User.query.filter_by(username=username).first()
@@ -235,5 +235,45 @@ def update_user():
         user = User.query.filter_by(id=id).first()
         user.username = data['username']
         user.save_db()
+        return jsonify(change_msg(user.to_json()))
+    return jsonify({'msg': "fail"})
+
+
+# 指定教师
+@auth.route('/selectteacher', methods=['PUT'])
+def selectteacher():
+    data = request.get_json()
+    stuid = data['stuid'] # 学生id
+    teaname = data['teaname'] # 教师姓名
+    student = Student.query.filter_by(id=stuid).first() # 学生数据对象
+    teacher = Teacher.query.filter_by(username=teaname).first() # 教师数据对象
+    if student is not None and teacher is not None:
+        student.teac = teacher
+        student.save_db()
+        return jsonify(change_msg(student.to_json()))
+    return jsonify({'msg': "fail"})
+
+
+# 修改用户角色
+@auth.route('/updateuserrole', methods=['PUT'])
+def update_user_role():
+    data = request.get_json()
+    id = data['id']
+    role = data['roles']
+    roles = Role.query.filter_by(name=role).first()
+    if role == 'Admin':
+        user = User.query.filter_by(id=id).first()
+        user.admin = roles
+        user.save_db();
+        return jsonify(change_msg(user.to_json()))
+    if role == 'Student':
+        user = Student.query.filter_by(id=id).first()
+        user.student = roles
+        user.save_db();
+        return jsonify(change_msg(user.to_json()))
+    if role == 'Teacher':
+        user = Teacher.query.filter_by(id=id).first()
+        user.student = roles
+        user.save_db();
         return jsonify(change_msg(user.to_json()))
     return jsonify({'msg': "fail"})
