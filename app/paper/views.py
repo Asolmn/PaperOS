@@ -1,4 +1,4 @@
-from flask import request, jsonify, send_from_directory
+from flask import request, jsonify, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 from app.paper import paper
 from app.models import Role, User, Student, Teacher, \
@@ -65,6 +65,11 @@ def receive_file():
     return jsonify({'msg': 'fail'})
 
 
+# 下载文件
 @paper.route('/downloadfile', methods=['POST'])
 def download_file():
-    pass
+    data = request.get_json()
+    uuid = data['uuid'] # 获取文件uuid
+    filedata = Paper.query.filter_by(uuid=uuid).first() # 获取文件数据
+    path = filedata.path # 文件路径
+    return send_file(path)

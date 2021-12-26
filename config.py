@@ -8,7 +8,7 @@ class Config:
     """配置参数类"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'asolmn'
 
-    DB = 'mysql'
+    DB = 'mysql+pymysql'
     NAME = 'root'
     PWD = '123456'
     HOST = 'localhost'

@@ -27,7 +27,7 @@ def login():
         student = Student.query.filter_by(username=username).first()
         if student is not None and student.password == password:
             return jsonify(change_msg(student.to_json()))
-    if role == 'Teachers':
+    if role == 'Teacher':
         teacher = Teacher.query.filter_by(username=username).first()
         if teacher is not None and teacher.password == password:
             return jsonify(change_msg(teacher.to_json()))
