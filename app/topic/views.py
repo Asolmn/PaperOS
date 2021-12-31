@@ -23,13 +23,14 @@ def create_topic():
         )
         topic.save_db()
         return jsonify(change_msg(topic.to_json()))
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 删除课题
 @topic.route('/deletetopic', methods=['DELETE'])
 def delete_topic():
     data = request.get_json()
+    print(data)
     uuids = data['uuids']
     # 根据uuid查询对应的课题
     temp = Topic.query.filter_by(uuid=uuids).first()
@@ -38,7 +39,7 @@ def delete_topic():
         res = change_msg(temp.to_json())
         temp.delete_db() # 删除课题
         return jsonify(res)
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 @topic.route('/changetopicname', methods=['PUT'])
@@ -51,7 +52,7 @@ def change_topicname():
         temp.topicname = topicname
         temp.save_db()
         return jsonify(change_msg(temp.to_json()))
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 # 修改课题状态
 @topic.route('/truestatus', methods=['PUT'])
@@ -64,7 +65,7 @@ def true_status():
         temp.save_db() # 重新提交数据库
         res = change_msg(temp.to_json()) # 返回数据
         return jsonify(res)
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 修改课题状态
@@ -78,7 +79,7 @@ def false_status():
         temp.save_db()
         res = change_msg(temp.to_json())
         return jsonify(res)
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 #获取课题信息
@@ -89,10 +90,10 @@ def get_info():
     temp = Topic.query.filter_by(uuid=uuids).first()
     if temp is not None:
         return jsonify(change_msg(temp.to_json()))
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
-#获取当前学生所有课题
+# 获取当前学生所有课题
 @topic.route('/stutopic', methods=['POST'])
 def get_stu_topic():
     data = request.get_json()
@@ -110,4 +111,32 @@ def get_stu_topic():
             res['flag'] = 1
             topicinfo.append(res)
         return jsonify(topicinfo)
-    return jsonify({'msg': 'fail'})
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+
+# 获取所指导学生的所有课题
+@topic.route('/alltopic', methods=['POST'])
+def all_topic():
+    data = request.get_json()
+    id = data['id']
+    teacher = Teacher.query.filter_by(id=id).first()
+    studentlist = teacher.to_json()['teacherinfo'][0]['students']
+    topiclist = []
+    topicinfo = []
+    if teacher is not None:
+        for i in studentlist:
+            temp = Student.query.filter_by(username=i).first()
+            topiclist += temp.to_json()['studentinfo'][0]['topics']
+        for j in topiclist:
+            topic = Topic.query.filter_by(uuid=j).first()
+            res = topic.to_json()['topicinfo'][0]
+            res['msg'] = "success"
+            res['flag'] = 1
+            topicinfo.append(res)
+        return jsonify(topicinfo)
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+
+
+
+

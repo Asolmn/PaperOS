@@ -13,6 +13,7 @@ class Config:
     PWD = '123456'
     HOST = 'localhost'
     DBNAME = 'paperos'
+    UPLOAD_FOLDER = 'D:/Project/PaperOS/uploads'
 
     @staticmethod
     def init_app(app):

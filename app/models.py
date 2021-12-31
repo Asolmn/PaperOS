@@ -1,5 +1,5 @@
 from app import db
-
+import datetime
 
 # 修改响应状态为成功
 def change_msg(res):
@@ -57,11 +57,12 @@ class Paper(db.Model):
     uuid = db.Column(db.String(128), unique=True)  # 文件名生成的uuid
     status = db.Column(db.Boolean, default=False)  # 论文状态
     path = db.Column(db.String(265))  # 文件路径
+    date = db.Column(db.DateTime, default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) # 保存上传时间
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'))  # 论文对应的学生
 
     def to_json(self):
         result = {
-            'userinfo': [
+            'paperinfo': [
                 {
                     'id': self.id,
                     'filename': self.filename,
@@ -69,7 +70,8 @@ class Paper(db.Model):
                     'status': self.status,
                     'student': self.stupaper.username if self.stupaper is not None else None,
                     'student_id': self.student_id,
-                    'path': self.path
+                    'path': self.path,
+                    'date': self.date
                 },
             ],
             "msg": "",
@@ -149,7 +151,8 @@ class Teacher(db.Model):
                     'username': self.username,
                     'password': self.password,
                     'students': studentlist,
-                    'role_id': self.role_id
+                    'role_id': self.role_id,
+                    'role': self.teacher.name if self.teacher is not None else None
                 }
             ],
             'msg': "",
@@ -215,7 +218,9 @@ class Student(db.Model):
                     'topics': topiclist,
                     'papers': paperlist,
                     'role_id': self.role_id,
-                    'role': self.student.name if self.student is not None else None}],
+                    'role': self.student.name if self.student is not None else None,
+                    'teacher_id': self.teacher_id
+                }],
             'msg': "",
             'flag': 0}
         return result

@@ -31,7 +31,7 @@ def login():
         teacher = Teacher.query.filter_by(username=username).first()
         if teacher is not None and teacher.password == password:
             return jsonify(change_msg(teacher.to_json()))
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 # 注册用户
 @auth.route('/register', methods=['GET', 'POST'])
@@ -81,7 +81,7 @@ def register():
             teacher.save_db()
             res = change_msg(teacher.to_json())
             return jsonify(res)
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 返回指定用户的信息
@@ -108,7 +108,34 @@ def get_user():
         teacher = Teacher.query.filter_by(username=username).first()
         if teacher is not None:
             return jsonify(change_msg(teacher.to_json()))
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+# 返回指定用户的信息
+@auth.route('/getuserid', methods=['GET', 'POST'])
+def get_user_id():
+    # 获取post信息
+    data = request.get_json()
+    id = data['id']
+    role = data['role']
+
+    # 根据不同的角色，查询不同的表
+    if role == 'Admin':
+        # 查询用户
+        user = User.query.filter_by(id=id).first()
+        # 如果用户不为空
+        if user is not None:
+            # 返回信息
+            return jsonify(change_msg(user.to_json()))
+    if role == 'Student':
+        student = Student.query.filter_by(id=id).first()
+        if student is not None:
+            return jsonify(change_msg(student.to_json()))
+    if role == 'Teacher':
+        teacher = Teacher.query.filter_by(id=id).first()
+        if teacher is not None:
+            return jsonify(change_msg(teacher.to_json()))
+    return jsonify({'msg': 'fail', 'flag': 0})
+
 
 
 # 返回指定角色的用户信息
@@ -123,18 +150,28 @@ def user_info():
         users = User.query.filter_by(admin=roles).all()
         # 循环将用户加入到列表中
         for i in users:
-            infolist.append(i.to_json())
-        return jsonify({'info': infolist})
+            res = i.to_json()['userinfo'][0]
+            res['msg'] = "success"
+            res['flag'] = 1
+            infolist.append(res)
+        return jsonify(infolist)
     if role == 'Student':
         students = Student.query.filter_by(student=roles).all()
         for i in students:
-            infolist.append(i.to_json())
-        return jsonify({'info': infolist})
+            res = i.to_json()['studentinfo'][0]
+            res['msg'] = "success"
+            res['flag'] = 1
+            infolist.append(res)
+        return jsonify(infolist)
     if role == 'Teacher':
         teachers = Teacher.query.filter_by(teacher=roles).all()
         for i in teachers:
-            infolist.append(i.to_json())
-        return jsonify({'info': infolist})
+            res = i.to_json()['teacherinfo'][0]
+            res['msg'] = "success"
+            res['flag'] = 1
+            infolist.append(res)
+        return jsonify(infolist)
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 获取所有用户信息
@@ -172,7 +209,7 @@ def create_role():
         )
         role.save_db()
         return jsonify(role.to_json())
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 返回指定角色的信息
@@ -185,7 +222,7 @@ def get_role():
     if role is not None:
         res = role.to_json()
         return jsonify(res)
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 获取所有角色信息
@@ -222,7 +259,7 @@ def delete_user():
         res = change_msg(teacher.to_json())
         teacher.delete_db()
         return jsonify(res)
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 更新用户信息
@@ -236,7 +273,7 @@ def update_user():
         user.username = data['username']
         user.save_db()
         return jsonify(change_msg(user.to_json()))
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 指定教师
@@ -251,7 +288,7 @@ def selectteacher():
         student.teac = teacher
         student.save_db()
         return jsonify(change_msg(student.to_json()))
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
 
 
 # 修改用户角色
@@ -276,4 +313,61 @@ def update_user_role():
         user.student = roles
         user.save_db();
         return jsonify(change_msg(user.to_json()))
-    return jsonify({'msg': "fail"})
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+# 获取当前教师的所有学生列表
+@auth.route('/teastulist', methods=['POST'])
+def get_tea_stulist():
+    data = request.get_json()
+    id = data['id']
+    teacher = Teacher.query.filter_by(id=id).first()
+    stulist = teacher.to_json()['teacherinfo'][0]['students'] # 学生列表
+    stulistinfo = [] # 返回学生信息
+    print(stulist)
+    # 教师不为0
+    if teacher is not None:
+        for i in stulist:
+            # 查询每一个对应的学生对象
+            temp = Student.query.filter_by(username=i).first()
+            res = temp.to_json()['studentinfo'][0]
+            res['msg'] = "success"
+            res['flag'] = 1
+            stulistinfo.append(res)
+        return jsonify(stulistinfo)
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+
+# 接触用户与指导老师之间的关系
+@auth.route('/relievestu', methods=['PUT'])
+def relieve_stu():
+    data = request.get_json()
+    stuid = data['stuid']
+    # teaid = data['teaid']
+    student = Student.query.filter_by(id=stuid).first()
+    if student is not None:
+        student.teac = None
+        student.teacher_id = None
+        student.save_db()
+        return jsonify(change_msg(student.to_json()))
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+
+# 获取教师所属的学生列表,只包含用户名和id
+@auth.route('/allstulist', methods=['POST'])
+def all_stu_list():
+    data = request.get_json()
+    id = data['id']
+    infolist = []
+    stuinfo = {}
+    teacher = Teacher.query.filter_by(id=id).first()
+    stulist = teacher.to_json()['teacherinfo'][0]['students'] # 学生列表
+    if teacher is not None:
+        for i in stulist:
+            # 查询每一个对应的学生对象
+            temp = Student.query.filter_by(username=i).first()
+            infolist.append({'username': temp.to_json()['studentinfo'][0]['username'], 'stuid':temp.to_json()['studentinfo'][0]['id']})
+        return jsonify(infolist)
+    return jsonify({'msg': 'fail', 'flag': 0})
+
+
+
