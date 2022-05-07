@@ -95,7 +95,7 @@ export default {
                     if (this.role == 'Admin'){
                         this.$message.success("登录成功");
                         window.sessionStorage.setItem("id", this.userinfo.id);
-                        this.$router.push('/index3');
+                        this.$router.push('/index3'); // 跳转到管理页
                     }
 
                 }
