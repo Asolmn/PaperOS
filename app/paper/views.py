@@ -9,7 +9,7 @@ import uuid
 import os
 
 # UPLOAD_FOLDER = os.path.abspath(os.path.join(os.getcwd(), r"../../uploads"))
-UPLOAD_FOLDER="D:\Project\PaperOS\\uploads"
+UPLOAD_FOLDER="/root/project/PaperOS/uploads"
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc'}
 
 # print(os.path.abspath(os.path.join(os.getcwd(), r"../../uploads"))
