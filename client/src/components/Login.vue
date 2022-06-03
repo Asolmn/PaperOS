@@ -51,7 +51,7 @@ export default {
                 ],
                 password: [
                     { rquired:true, message: '请输入用户名', trigger: 'blur'},
-                    { min: 3, max: 5, message: "长度在3到5个字符", trigger: 'blur'}
+                    { min: 3, max: 5, message: "长度在3到20个字符", trigger: 'blur'}
                 ]
             },
             userinfo: {

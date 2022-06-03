@@ -40,11 +40,11 @@ def register():
     data = request.get_json()
     username = data['username']
     password = data['password']
-    teac = data['teac']
+    # teac = data['teac']
     role = data['role']
     # 获取角色
     roles = Role.query.filter_by(name=role).first()
-    teacher = Teacher.query.filter_by(username=teac).first()
+    # teacher = Teacher.query.filter_by(username=teac).first()
     if role == 'Admin':
         # 获取用户的角色
         temp = User.query.filter_by(username=username).first()
@@ -65,8 +65,8 @@ def register():
             student = Student(
                 username=username,
                 password=password,
-                student=roles,
-                teac=teacher)
+                student=roles)
+                # teac=teacher)
             student.save_db()
             res = change_msg(student.to_json())
             return jsonify(res)
@@ -237,6 +237,19 @@ def all_role():
     res = {'info': rolelist}
     return jsonify(res)
 
+
+# 删除角色
+@auth.route('/deletrole', methods=['DELETE'])
+def delete_role():
+    data = request.get_json()
+    name = data['name']
+    role = Role.query.filter_by(name=name).first()
+    if role is not None:
+        res = change_msg(role.to_json())
+        role.delete_db()
+        return jsonify(res)
+    return jsonify({'msg': 'fail', 'flag': 0})
+
 # 删除用户
 @auth.route('/deleteuser', methods=['DELETE'])
 def delete_user():
@@ -262,7 +275,7 @@ def delete_user():
     return jsonify({'msg': 'fail', 'flag': 0})
 
 
-# 更新用户信息
+# 更新用户名
 @auth.route('/updateuserinfo', methods=['PUT'])
 def update_user():
     data = request.get_json()
@@ -270,6 +283,16 @@ def update_user():
     id = data['id']
     if role == 'Admin':
         user = User.query.filter_by(id=id).first()
+        user.username = data['username']
+        user.save_db()
+        return jsonify(change_msg(user.to_json()))
+    if role == 'Student':
+        user = Student.query.filter_by(id=id).first()
+        user.username = data['username']
+        user.save_db()
+        return jsonify(change_msg(user.to_json()))
+    if role == 'Teacher':
+        user = Teacher.query.filter_by(id=id).first()
         user.username = data['username']
         user.save_db()
         return jsonify(change_msg(user.to_json()))
@@ -296,21 +319,23 @@ def selectteacher():
 def update_user_role():
     data = request.get_json()
     id = data['id']
-    role = data['roles']
-    roles = Role.query.filter_by(name=role).first()
+    role = data['role']
+    updaterole = data['updaterole']
+    # roles = Role.query.filter_by(name=role).first()
+    updateroles = Role.query.filter_by(name=updaterole).first()
     if role == 'Admin':
         user = User.query.filter_by(id=id).first()
-        user.admin = roles
+        user.admin = updateroles
         user.save_db();
         return jsonify(change_msg(user.to_json()))
     if role == 'Student':
         user = Student.query.filter_by(id=id).first()
-        user.student = roles
+        user.student = updateroles
         user.save_db();
         return jsonify(change_msg(user.to_json()))
     if role == 'Teacher':
         user = Teacher.query.filter_by(id=id).first()
-        user.student = roles
+        user.student = updateroles
         user.save_db();
         return jsonify(change_msg(user.to_json()))
     return jsonify({'msg': 'fail', 'flag': 0})
@@ -337,7 +362,7 @@ def get_tea_stulist():
     return jsonify({'msg': 'fail', 'flag': 0})
 
 
-# 接触用户与指导老师之间的关系
+# 解除用户与指导老师之间的关系
 @auth.route('/relievestu', methods=['PUT'])
 def relieve_stu():
     data = request.get_json()

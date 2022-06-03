@@ -41,7 +41,7 @@ def delete_topic():
         return jsonify(res)
     return jsonify({'msg': 'fail', 'flag': 0})
 
-
+# 修改课题
 @topic.route('/changetopicname', methods=['PUT'])
 def change_topicname():
     data = request.get_json()

@@ -101,7 +101,7 @@
                             <el-input v-model="userForm.password"></el-input>
                         </el-form-item>
                         <el-form-item label="角色" prop="role" style="width: 60%; margin-left: 5px">
-                            <el-select v-model="rolevalue" placeholder="请选择juese">
+                            <el-select v-model="rolevalue" placeholder="请选择角色">
                                 <el-option v-for="(i, index) in roleForm" :value="i.role" :key="index"></el-option>
                             </el-select>
                         </el-form-item>
