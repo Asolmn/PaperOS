@@ -11,6 +11,11 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            "pool_size": 120,
+            "max_overflow": 5,
+            "pool_timeout": 60
+            }
 
     CORS(app, supports_credentials=True)
 
